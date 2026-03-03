@@ -430,6 +430,10 @@ class PdfProvider(BaseProvider):
     def get_page_refs(self, idx: int) -> List[Reference]:
         return self.page_refs[idx]
 
+    def get_page_labels(self) -> Dict[int, str]:
+        with self.get_doc() as doc:
+            return {i: doc.get_page_label(i) for i in self.page_range}
+
     @staticmethod
     def _get_fontname(font) -> str:
         font_name = ""
