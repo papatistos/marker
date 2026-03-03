@@ -52,6 +52,7 @@ def test_markdown_renderer_pagination_negative_offset(pdf_document):
 
 @pytest.mark.config({"page_range": [0, 1], "paginate_output": True})
 def test_markdown_renderer_pagination_blank_last_page(pdf_document):
+    # Clear all children and structure from the last page to simulate a blank page
     last_page = pdf_document.pages[-1]
     last_page.children = []
     last_page.structure = []
