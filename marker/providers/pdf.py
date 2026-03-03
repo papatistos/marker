@@ -435,9 +435,12 @@ class PdfProvider(BaseProvider):
             labels = {}
             for i in self.page_range:
                 label = doc.get_page_label(i)
-                # Only keep labels that are explicitly different from the default
-                # 1-based sequential number; pages with default labels fall back
-                # to page_id in external outputs.
+                # Only keep labels that differ from the default 1-based
+                # sequential number (str(i + 1)).  This is a heuristic: if a
+                # PDF author explicitly numbered pages "1", "2", "3" using a
+                # PageLabels entry, those labels will be silently dropped.
+                # For the "always use whatever is shown in the PDF viewer"
+                # behaviour, use the unfiltered version of this method.
                 if label is not None and label != str(i + 1):
                     labels[i] = label
             return labels
