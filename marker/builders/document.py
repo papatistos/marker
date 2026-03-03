@@ -54,5 +54,5 @@ class DocumentBuilder(BaseBuilder):
         return DocumentClass(
             filepath=provider.filepath,
             pages=initial_pages,
-            page_labels=page_labels if any(page_labels.values()) else None,
+            page_labels=page_labels if page_labels else None,
         )
