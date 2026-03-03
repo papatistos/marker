@@ -432,14 +432,20 @@ class PdfProvider(BaseProvider):
 
     def get_page_labels(self) -> Dict[int, str]:
         # Returns every label exactly as a PDF viewer would display it,
-        # including "1", "2", "3" for pages that have no explicit
-        # PageLabels entry (the /D default range).  This means a PDF
-        # with no author-assigned labels is indistinguishable from one
-        # that explicitly numbered its pages "1", "2", "3".
-        # For a heuristic that filters out default-looking labels see
+        # including "1", "2", "3" for pages that use the default /D
+        # PageLabels range.  Only pages where get_page_label returns
+        # None (no label at all) are omitted.
+        # Tradeoff: a PDF with no author-assigned PageLabels entry is
+        # indistinguishable from one that explicitly numbered pages
+        # "1", "2", "3" — both return the same values.
+        # For a heuristic that filters out default-looking labels, see
         # the copilot/modify-pdf-page-labels branch.
         with self.get_doc() as doc:
-            return {i: doc.get_page_label(i) for i in self.page_range}
+            return {
+                i: label
+                for i in self.page_range
+                if (label := doc.get_page_label(i)) is not None
+            }
 
     @staticmethod
     def _get_fontname(font) -> str:
