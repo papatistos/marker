@@ -432,7 +432,15 @@ class PdfProvider(BaseProvider):
 
     def get_page_labels(self) -> Dict[int, str]:
         with self.get_doc() as doc:
-            return {i: doc.get_page_label(i) for i in self.page_range}
+            labels = {}
+            for i in self.page_range:
+                label = doc.get_page_label(i)
+                # Only keep labels that are explicitly different from the default
+                # 1-based sequential number; pages with default labels fall back
+                # to page_id in external outputs.
+                if label is not None and label != str(i + 1):
+                    labels[i] = label
+            return labels
 
     @staticmethod
     def _get_fontname(font) -> str:
