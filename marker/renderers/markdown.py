@@ -64,6 +64,7 @@ class Markdownify(MarkdownConverter):
         block_math_delimiters,
         html_tables_in_markdown,
         pagination_offset=0,
+        use_pdf_page_labels=False,
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -73,11 +74,15 @@ class Markdownify(MarkdownConverter):
         self.block_math_delimiters = block_math_delimiters
         self.html_tables_in_markdown = html_tables_in_markdown
         self.pagination_offset = pagination_offset
+        self.use_pdf_page_labels = use_pdf_page_labels
 
     def convert_div(self, el, text, parent_tags):
         is_page = el.has_attr("class") and el["class"][0] == "page"
         if self.paginate_output and is_page:
-            page_id = int(el["data-page-id"]) + self.pagination_offset
+            if self.use_pdf_page_labels and el.get("data-page-label"):
+                page_id = el["data-page-label"]
+            else:
+                page_id = int(el["data-page-id"]) + self.pagination_offset
             pagination_item = (
                 "\n\n" + "{" + str(page_id) + "}" + self.page_separator + "\n\n"
             )
@@ -296,6 +301,7 @@ class MarkdownRenderer(HTMLRenderer):
             block_math_delimiters=self.block_math_delimiters,
             html_tables_in_markdown=self.html_tables_in_markdown,
             pagination_offset=self.pagination_offset,
+            use_pdf_page_labels=self.use_pdf_page_labels,
         )
 
     def __call__(self, document: Document) -> MarkdownOutput:

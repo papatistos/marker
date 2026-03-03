@@ -68,6 +68,9 @@ class BaseProvider:
     def get_page_refs(self, idx: int) -> List[Reference]:
         pass
 
+    def get_page_labels(self) -> Dict[int, str]:
+        return {}
+
     def __enter__(self):
         return self
 

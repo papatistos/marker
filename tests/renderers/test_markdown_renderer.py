@@ -74,6 +74,30 @@ def test_markdown_renderer_metadata(pdf_document):
 
 
 @pytest.mark.config({"page_range": [0, 1]})
+def test_markdown_renderer_metadata_page_labels(pdf_document):
+    pdf_document.page_labels = {0: "i", 1: "ii"}
+    renderer = MarkdownRenderer()
+    metadata = renderer(pdf_document).metadata
+    page_stats = metadata["page_stats"]
+
+    assert page_stats[0]["page_id"] == 0
+    assert page_stats[0]["page_label"] == "i"
+    assert page_stats[1]["page_id"] == 1
+    assert page_stats[1]["page_label"] == "ii"
+
+
+@pytest.mark.config({"page_range": [0, 1]})
+def test_markdown_renderer_metadata_no_page_labels(pdf_document):
+    # When no page_labels are set, page_label should not appear in page_stats
+    renderer = MarkdownRenderer()
+    metadata = renderer(pdf_document).metadata
+    page_stats = metadata["page_stats"]
+
+    assert "page_label" not in page_stats[0]
+    assert "page_label" not in page_stats[1]
+
+
+@pytest.mark.config({"page_range": [0, 1]})
 def test_markdown_renderer_images(pdf_document):
     renderer = MarkdownRenderer({"extract_images": False})
     markdown_output = renderer(pdf_document)
@@ -104,3 +128,27 @@ def test_markdown_renderer_tables(pdf_document):
     renderer = MarkdownRenderer()
     md = renderer(pdf_document).markdown
     assert "54 <i>.45</i> 67<br>89 $x$" in md
+
+
+@pytest.mark.config({"page_range": [0, 1], "paginate_output": True})
+def test_markdown_renderer_pdf_page_labels(pdf_document):
+    # Simulate a PDF with embedded page labels (e.g. roman numerals)
+    pdf_document.page_labels = {0: "i", 1: "ii"}
+
+    renderer = MarkdownRenderer({"paginate_output": True, "use_pdf_page_labels": True})
+    md = renderer(pdf_document).markdown
+
+    assert "\n\n{i}-" in md
+    assert "\n\n{ii}-" in md
+
+
+@pytest.mark.config({"page_range": [0, 1], "paginate_output": True})
+def test_markdown_renderer_pdf_page_labels_disabled(pdf_document):
+    # When use_pdf_page_labels is False, numeric page ids should be used even if labels are present
+    pdf_document.page_labels = {0: "i", 1: "ii"}
+
+    renderer = MarkdownRenderer({"paginate_output": True, "use_pdf_page_labels": False})
+    md = renderer(pdf_document).markdown
+
+    assert "\n\n{0}-" in md
+    assert "\n\n{1}-" in md

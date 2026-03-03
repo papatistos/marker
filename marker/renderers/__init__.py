@@ -104,14 +104,15 @@ class BaseRenderer:
                 [str(block.block_type) for block in page.children]
             ).most_common()
             block_metadata = page.aggregate_block_metadata()
-            page_stats.append(
-                {
-                    "page_id": page.page_id,
-                    "text_extraction_method": page.text_extraction_method,
-                    "block_counts": block_counts,
-                    "block_metadata": block_metadata.model_dump(),
-                }
-            )
+            stat = {
+                "page_id": page.page_id,
+                "text_extraction_method": page.text_extraction_method,
+                "block_counts": block_counts,
+                "block_metadata": block_metadata.model_dump(),
+            }
+            if document.page_labels:
+                stat["page_label"] = document.page_labels.get(page.page_id)
+            page_stats.append(stat)
         return page_stats
 
     def generate_document_metadata(self, document: Document, document_output):

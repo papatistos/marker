@@ -49,5 +49,10 @@ class DocumentBuilder(BaseBuilder):
                 refs=provider.get_page_refs(p)
             ) for i, p in enumerate(provider.page_range)
         ]
+        page_labels = provider.get_page_labels()
         DocumentClass: Document = get_block_class(BlockTypes.Document)
-        return DocumentClass(filepath=provider.filepath, pages=initial_pages)
+        return DocumentClass(
+            filepath=provider.filepath,
+            pages=initial_pages,
+            page_labels=page_labels if page_labels else None,
+        )

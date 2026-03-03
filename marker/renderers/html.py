@@ -43,6 +43,10 @@ class HTMLRenderer(BaseRenderer):
         int,
         "An integer offset added to each page number when paginating output.",
     ] = 0
+    use_pdf_page_labels: Annotated[
+        bool,
+        "Whether to use the page labels embedded in the PDF as page numbers when paginating output.",
+    ] = False
 
     def extract_image(self, document, image_id):
         image_block = document.get_block(image_id)
@@ -115,7 +119,13 @@ class HTMLRenderer(BaseRenderer):
             elif ref_block_id.block_type in self.page_blocks:
                 images.update(sub_images)
                 if self.paginate_output:
-                    content = f"<div class='page' data-page-id='{ref_block_id.page_id}'>{content}</div>"
+                    page_id = ref_block_id.page_id
+                    label_attr = ""
+                    if self.use_pdf_page_labels and document.page_labels:
+                        label = document.page_labels.get(page_id, "")
+                        if label:
+                            label_attr = f" data-page-label='{label}'"
+                    content = f"<div class='page' data-page-id='{page_id}'{label_attr}>{content}</div>"
                 element = BeautifulSoup(f"{content}", "html.parser")
                 ref.replace_with(self.insert_block_id(element, ref_block_id))
             else:
